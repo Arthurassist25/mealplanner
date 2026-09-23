@@ -1,0 +1,14 @@
+{
+  "name": "MealPlanner",
+  "short_name": "MealPlanner",
+  "description": "21-day healing and animal-based meal plans with an auto-aggregating shopping list.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f4ee",
+  "theme_color": "#5c6b50",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
