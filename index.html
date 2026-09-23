@@ -109,6 +109,16 @@ details.recipe .m{font-size:13px;color:var(--mut);margin:8px 0 0}
 .srow .when{color:var(--mut)}
 .srow .why{color:var(--mut);font-style:italic}
 .snote{font-size:13px;color:var(--mut);margin:14px 0 0;line-height:1.5}
+.badge{display:inline-block;font:700 10px/1 inherit;letter-spacing:.08em;text-transform:uppercase;
+  border-radius:999px;padding:3px 8px;margin-left:6px;vertical-align:middle}
+.badge.daily{background:var(--accent-soft);color:var(--accent)}
+.badge.phase{background:transparent;color:var(--mut);border:1px solid var(--line)}
+.srow{cursor:pointer}
+.srow .tick{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;
+  position:relative;top:3px}
+.srow.done .tick{border-color:var(--accent);background:var(--accent)}
+.srow.done .nm{opacity:.5;text-decoration:line-through}
+.srow.phaserow{cursor:default;opacity:.62}
 .btn.ghost{background:var(--card);color:var(--fg);border:1px solid var(--line)}
 
 /* ---------- overlay sheet ---------- */
@@ -146,6 +156,8 @@ footer{padding:30px 0 20px;color:var(--mut);font-size:12.5px;text-align:center}
   <div class="seg" id="planSeg" role="tablist" aria-label="Meal plan"></div>
   <div class="seg" id="weekSeg" aria-label="Week"></div>
   <button class="tabbtn" id="suppBtn" style="display:none">Supplements</button>
+  <button class="tabbtn" id="routBtn">Routines</button>
+  <a class="tabbtn" id="pinBtn" href="https://pin.it/3SK77URPL" target="_blank" rel="noopener">&#128086; Mood board</a>
   <span class="spacer"></span>
   <div class="bulk">
     <button id="bAll" title="Include every meal this week">All</button>
@@ -368,8 +380,55 @@ function openSheet(){
 function closeSheet(){q("#ov").classList.remove("open");}
 
 /* ---------- supplements sheet ---------- */
+function loadTicks(){
+  try{ticks=JSON.parse(localStorage.getItem("mp-ticks-"+todayKey())||"{}");}catch(e){ticks={};}
+  if(window.__remoteState&&window.__remoteState.day===todayKey()&&window.__remoteState.ticks){
+    var r=window.__remoteState.ticks, merged={};
+    Object.keys(r).forEach(function(k){merged[k]=true;});
+    Object.keys(ticks).forEach(function(k){merged[k]=true;});
+    ticks=merged;
+  }
+}
+fetch("/state").then(function(r){return r.json();}).then(function(st){window.__remoteState=st;}).catch(function(){});
 function openSupps(){
-  var p=P(), g=p.suppGuide||[];
+  loadTicks();
+  var D=window.MEAL_DATA, g=(D.suppGroups&&D.suppGroups.length)?D.suppGroups:(P().suppGuide||[]);
+  var teas=D.teas||[];
+  if(teas.length){
+    html='';
+    var thtml='<div class="sgroup">Teas (between meals)</div>';
+    teas.forEach(function(t){
+      thtml+='<div class="srow" data-k="tea:'+t.name+'"><span class="tick"></span><span><b>'+esc(t.name)+
+        '</b> <span class="when">'+esc(t.when)+'</span><br><span class="why">'+esc(t.amt+' — '+t.why)+'</span></span></div>';
+    });
+    html+=thtml;
+  }
+  var rituals=D.rituals||[];
+  if(rituals.length){
+    html+='<div class="sgroup">Daily rituals</div>';
+    rituals.forEach(function(r){
+      html+='<div class="srow" data-k="rit:'+r.name+'"><span class="tick"></span><span><b>'+esc(r.name)+'</b> <span class="when">'+esc(r.when)+'</span>'
+        +'<br><span class="why">'+esc(r.text||r.why||'')+(r.note?' '+esc(r.note):'')+'</span></span></div>';
+    });
+  }
+  g.forEach(function(grp){
+    html+='<div class="sgroup">'+esc(grp.group)+(grp.kind==='phase'?' <span class="badge phase">protocol phase</span>':' <span class="badge daily">daily</span>')+'</div>';
+    (grp.items||[]).forEach(function(it){
+      var isPhase=grp.kind==='phase';
+      html+='<div class="srow'+(isPhase?' phaserow':'')+'"'+(isPhase?'':' data-k="supp:'+it[0]+'"')+'><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[2])+'</span>'
+        +'<br><span class="why">'+esc(it[3])+'</span></span>'
+        +'<span class="dose">'+esc(it[1])+'</span></div>';
+    });
+  });
+  if(P().suppsNote) html+='<p class="snote">'+esc(P().suppsNote)+'</p>';
+  q("#shList").innerHTML=html;
+  wireTicks();
+  q("#shTitle").textContent="Supplements — "+P().short+" protocol";
+  q("#shSub").textContent="Tick the daily ones as you take them. Phase-tagged items are managed by the protocol — greyed until active.";
+  q("#ov").classList.add("open");
+  return;
+  /* legacy renderer kept below for fallback */
+  var p=P(), g2=p.suppGuide||[];
   q("#shTitle").textContent="Supplements — "+p.short+" protocol";
   q("#shSub").textContent="Complete guide: what, dose, timing and why. Per-meal reminders also appear on each meal card.";
   var html="";
@@ -387,6 +446,52 @@ function openSupps(){
   q("#ov").classList.add("open");
 }
 q("#suppBtn").onclick=openSupps;
+
+/* ---------- routines sheet ---------- */
+function openRoutines(){
+  loadTicks();
+  var D=window.MEAL_DATA, html='';
+  (D.routines||[]).forEach(function(grp){
+    html+='<div class="sgroup">'+esc(grp.group)+'</div>';
+    (grp.items||[]).forEach(function(it){
+      html+='<div class="srow" data-k="rout:'+it[0]+'"><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[1])+'</span>'
+        +'<br><span class="why">'+esc(it[2])+'</span></span></div>';
+    });
+  });
+  q("#shTitle").textContent="Daily routines";
+  q("#shSub").textContent="Non-food practices: oral care, oil pulling, lymph flow, evening mobility.";
+  q("#shList").innerHTML=html;
+  wireTicks();
+  q("#ov").classList.add("open");
+}
+q("#routBtn").onclick=openRoutines;
+
+/* ---------- check-off persistence (cross-device via /state when available) ---------- */
+var ticks={};
+try{ticks=JSON.parse(localStorage.getItem("mp-ticks")||"{}");}catch(e){}
+function saveTicks(){
+  localStorage.setItem("mp-ticks-"+todayKey(), JSON.stringify(ticks));
+  if(window.__stateSave) window.__stateSave({ticks:ticks, day:todayKey()});
+}
+function todayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+window.__stateSave=function(obj){
+  try{fetch("/state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj)});}catch(e){}
+};
+window.__stateLoad=function(cb){
+  try{fetch("/state").then(function(r){return r.json();}).then(function(st){if(st&&st.ticks)window.__remoteState=st;}).catch(function(){});}catch(e){}
+};
+function wireTicks(){
+  q("#shList").querySelectorAll(".srow[data-k]").forEach(function(row){
+    var k=row.getAttribute("data-k");
+    if(ticks[k])row.classList.add("done");
+    row.onclick=function(){
+      var on=!row.classList.contains("done");
+      row.classList.toggle("done",on);
+      if(on)ticks[k]=true;else delete ticks[k];
+      saveTicks();
+    };
+  });
+}
 
 /* ---------- actions ---------- */
 q("#bAll").onclick=function(){var a=inclArr();for(var i=0;i<a.length;i++)a[i]=true;save();renderDays();updateCounts();};
