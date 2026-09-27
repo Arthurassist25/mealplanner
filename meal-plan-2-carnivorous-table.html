@@ -1,0 +1,257 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Carnivorous Table — 21-Day Meal Plan</title>
+<style>
+:root{
+  --bg:#faf6f1; --fg:#2a2620; --mut:#756b5d; --line:#e8dfd2;
+  --card:#fffdf8; --card2:#f3ece1; --accent:#8a3b2e;
+  --accent-soft:#f0e2da; --serif:Georgia,'Times New Roman',serif; --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans),sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+header.mast{border-bottom:1px solid var(--line);padding:46px 0 34px;background:
+  linear-gradient(180deg, var(--card), transparent)}
+.kicker{font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin:0 0 12px}
+h1{font-family:var(--serif),serif;font-size:clamp(34px,5.4vw,56px);line-height:1.02;
+  margin:0 0 16px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--mut);max-width:62ch;font-size:17px;margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.meta span{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;
+  color:var(--mut);background:var(--card)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:30px 0 6px}
+.tab{font:600 14px var(--sans);padding:9px 16px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--mut);cursor:pointer}
+.tab.on{background:var(--accent);color:var(--card);border-color:var(--accent)}
+.hint{color:var(--mut);font-size:13.5px;margin:0 0 22px}
+.day{border:1px solid var(--line);border-radius:16px;background:var(--card);
+  margin:18px 0;overflow:hidden}
+.day-head{display:flex;align-items:baseline;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);
+  background:var(--card2)}
+.day-head .dn{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--fg)}
+.day-head .dt{color:var(--mut);font-size:13.5px}
+.day-cols{display:grid;grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.day-cols{grid-template-columns:1fr}}
+.meal{padding:18px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.meal:last-child{border-right:none}
+@media(max-width:820px){.meal{border-right:none;border-bottom:1px solid var(--line)}}
+.meal .slot{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  color:var(--accent)}
+.meal h3{font-family:var(--serif);font-size:18px;margin:2px 0 0;line-height:1.25;font-weight:600}
+.meal .tag{color:var(--mut);font-size:13.5px;margin:0 0 4px}
+.chk{display:flex;align-items:flex-start;gap:9px;border-top:1px dashed var(--line);padding:10px 0 2px;
+  font-size:13.5px;color:var(--mut);cursor:pointer}
+.chk input{accent-color:var(--accent);margin-top:2px}
+.ing{padding:0;margin:0;list-style:none}
+.ing li{font-size:13.5px;line-height:1.45;display:flex;gap:7px}
+.ing .amt{color:var(--fg);font-weight:600;white-space:nowrap;margin-left:auto}
+.ing .nm{color:var(--mut)}
+.ing .ic{flex:none}
+.method{font-size:13.5px;color:var(--mut);border-left:2px solid var(--accent-soft);
+  padding-left:10px;margin:2px 0 0}
+.supps{font-size:12.5px;color:var(--fg);background:var(--accent-soft);border-radius:8px;
+  padding:6px 9px}
+.note{font-size:12.5px;color:var(--mut);font-style:italic;margin:0}
+.timer{font:600 12px var(--sans);color:var(--accent)}
+.shop{position:sticky;bottom:0;left:0;right:0;background:var(--card);
+  border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(0,0,0,.06);z-index:5}
+.shop-inner{max-width:1120px;margin:0 auto;padding:14px 22px;display:flex;gap:18px;align-items:center;
+  flex-wrap:wrap}
+.shop-inner h4{margin:0;font-family:var(--serif);font-size:17px;white-space:nowrap}
+.shop-count{color:var(--mut);font-size:13px}
+.shop-btn{font:600 14px var(--sans);padding:11px 20px;border-radius:10px;border:none;cursor:pointer;
+  background:var(--accent);color:var(--card)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;
+  justify-content:center;z-index:10}
+.overlay.open{display:flex}
+.sheet{background:var(--bg);max-width:760px;width:100%;max-height:88vh;overflow:auto;
+  border-radius:18px 18px 0 0;padding:26px 30px 34px}
+.sheet .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sheet h4{font-family:var(--serif);font-size:22px;margin:0}
+.sheet .close{font:600 20px var(--sans);background:none;border:none;cursor:pointer;color:var(--fg)}
+.sheet .sub{color:var(--mut);font-size:13.5px;margin:0 0 18px}
+.sheet .cat{margin:18px 0 6px;font-weight:700;font-size:13px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent)}
+.sheet .row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;
+  border-bottom:1px solid var(--line);font-size:14.5px}
+.sheet .row .rq{color:var(--mut);white-space:nowrap}
+.sheet .row b{font-weight:600}
+.sheet .print{margin-top:20px;font:600 15px var(--sans);padding:12px 22px;border-radius:10px;
+  border:none;cursor:pointer;background:var(--accent);color:var(--card)}
+.sheet .reset{margin-left:8px;font:600 15px var(--sans);padding:12px 22px;border-radius:10px;
+  border:1px solid var(--line);cursor:pointer;background:var(--card);color:var(--fg)}
+.sheet .ta{width:100%;height:120px;margin-top:14px;padding:12px;border:1px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--fg);font:13.5px/1.5 var(--sans);resize:vertical}
+.sheet .copy{font:600 15px var(--sans);padding:12px 22px;border-radius:10px;border:none;cursor:pointer;
+  background:var(--card2);color:var(--fg);border:1px solid var(--line)}
+footer{padding:40px 0 130px;color:var(--mut);font-size:13px;text-align:center}
+.foot-note{max-width:640px;margin:0 auto}
+@media print{body{background:#fff}.shop,.overlay{display:none!important}.day{break-inside:avoid}}
+</style></head><body>
+
+<header class="mast"><div class="wrap">
+  <p class="kicker">Meal Plan Two · 21 days</p>
+  <h1>The Carnivorous Table</h1>
+  <p class="lede">A plain-spoken whole-food, animal-forward plan for when you want to stop thinking about “protocol” and just eat really well. Meat, fish, eggs, organs, dairy and good fats at the centre; gluten and grains are welcome here. Richer, more varied, a little more indulgent — and still easy on the wallet.</p>
+  <div class="meta">
+    <span>21 days · 3 meals a day</span>
+    <span>21 distinct meals — one satisfying plate per meal slot, no repeats</span>
+    <span>Budget-wide: chicken, mince, tinned fish &amp; organ cuts by default; steak / pork belly / seafood as the treat nights</span>
+    <span>Works offline · single file</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <p class="hint">Tap the week tabs, tick the meals you want this week, and the shopping list builds itself. Every meal stands alone — mix and match across weeks freely.</p>
+  <div id="days"></div>
+</div>
+
+<div class="shop"><div class="shop-inner">
+  <h4>Shopping list</h4>
+  <div class="shop-count" id="shopCount">0 meals selected</div>
+  <button class="shop-btn" id="openShop">View shopping list</button>
+</div></div>
+
+<div class="overlay" id="overlay"><div class="sheet">
+  <div class="head"><h4>Carnivorous week — shopping list</h4><button class="close" id="closeShop">&#215;</button></div>
+  <p class="sub" id="shopSub">Loading&#8230;</p>
+  <div id="shopList"></div>
+  <button class="copy" id="copyShop">Copy as text</button>
+  <button class="print" id="printShop">Print</button>
+  <textarea class="ta" id="taOut"></textarea>
+</div></div>
+
+<footer><div class="wrap foot-note">Whole-food kitchen with an eye on cost. Note: this plan deliberately relaxes your case’s gut restrictions (gluten &amp; dairy allowed) in exchange for variety and indulgence — it’s the “eat normally and well” break, not the healing protocol.</div></footer>
+
+<script>
+var WEEKS = [[[{"name": "Steak & Eggs with Sourdough", "tag": "The classic rescue \u2014 buttery eggs, seared steak, crisp sourdough", "time": "15 min", "ingredients": [["sirloin or ribeye", "150 g", "protein"], ["pasture-raised eggs", "3", "protein"], ["sourdough bread (gluten ok here)", "1-2 slices", "carbs"], ["butter or ghee", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Sear the steak to your liking, rest it. Fry the eggs in butter, toast the sourdough. Stack and finish with chives."}, {"name": "Chicken Caesar (Proper, with Anchovies)", "tag": "Grilled chicken, crisp romaine, real Caesar dressing, sourdough croutons", "time": "25 min", "ingredients": [["chicken breast", "150 g", "protein"], ["romaine lettuce", "1 head", "vet"], ["anchovy fillets", "3", "protein"], ["parmesan", "30 g", "dairy"], ["pasture-raised egg yolk", "1", "protein"], ["extra-virgin olive oil", "2 tbsp", "fats"], ["sourdough (croutons)", "1 slice", "carbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Grill the chicken. Mash anchovies + yolk + parmesan + oil into a dressing. Toss the romaine, top with sliced chicken and toasted croutons."}, {"name": "Sunday Roast Chicken & Gravy", "tag": "Whole roasted chicken, roast potatoes, veg and real gravy", "time": "15 prep / 60 roast", "ingredients": [["whole chicken", "1.4 kg", "protein"], ["potatoes", "600 g", "carbs"], ["carrots + parsnips", "2 of each", "vet"], ["onion", "1", "vet"], ["butter", "1 tbsp", "fats"], ["chicken stock", "400 ml", "drinks"], ["rosemary + thyme", "a sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Butter-and-season the chicken, roast with veg until golden (about 60 min at 190\u00b0C). Deglaze the pan with stock for gravy. Carve and serve.", "note": "Batch it: roast two birds, use leftovers for the week."}], [{"name": "Smoked Salmon & Soft Egg Plate", "tag": "Cafe breakfast: smoked salmon, soft eggs, avocado on sourdough", "time": "12 min", "ingredients": [["smoked salmon", "80 g", "protein"], ["pasture-raised eggs", "2", "protein"], ["avocado", "1/2", "fats"], ["sourdough", "1 slice", "carbs"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Toast the sourdough, mash avocado on top, pile on the salmon and a soft-poached egg. Season and squeeze lemon."}, {"name": "Garlic Butter Steak Bites & Potatoes", "tag": "Pan-seared steak bites with garlicky roasted potato chunks", "time": "25 min", "ingredients": [["sirloin", "200 g", "protein"], ["baby potatoes", "300 g", "carbs"], ["butter", "1 tbsp", "fats"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the halved potatoes. Sear the steak bites with garlic and rosemary in butter. Toss together, rest, serve."}, {"name": "Pan-Seared Ribeye with Blue-Cheese Butter", "tag": "The steakhouse dinner at home", "time": "25 min", "ingredients": [["ribeye steak", "250 g", "protein"], ["blue cheese", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["garlic", "1 clove", "pantry"], ["roast potatoes", "250 g", "carbs"], ["green beans", "1 handful", "vet"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the potatoes. Cook the steak to rare-medium, rest. Warm butter + blue cheese + garlic into a quick sauce. Serve with saut\u00e9d beans."}], [{"name": "Sausage, Pepper & Egg Fry-up", "tag": "A proper breakfast fry-up done in one pan", "time": "18 min", "ingredients": [["pork or beef sausages", "2", "protein"], ["pasture-raised eggs", "3", "protein"], ["bell peppers", "1", "vet"], ["onion", "1/4", "vet"], ["butter", "1 tbsp", "fats"], ["hot sauce (optional)", "to taste", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the sausages, add peppers and onion, then crack the eggs and fry until set. Slide into a heap on a plate."}, {"name": "Open-Faced Smoked Mackerel Toast", "tag": "Rich smoked mackerel, pickled onion and rocket on dark rye", "time": "10 min", "ingredients": [["smoked mackerel", "1 fillet", "protein"], ["dark rye bread", "2 slices", "carbs"], ["rocket leaves", "1 handful", "vet"], ["red onion (quick-pickled)", "1/4", "vet"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Pile rocket and mackerel on toasted rye, add pickled onion, squeeze lemon. A 10-minute lunch with real flavour."}, {"name": "Pork Belly & Crispy Greens", "tag": "Slow-crisped pork belly with charred greens and apple slaw", "time": "20 prep / slow-cook", "ingredients": [["pork belly (skin on)", "400 g", "protein"], ["apple cider vinegar", "1 tsp", "pantry"], ["kale or cabbage", "3 handfuls", "vet"], ["green apple", "1", "fruit"], ["olive oil", "1 tbsp", "fats"], ["fennel seeds", "1/2 tsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the pork belly (sous-vide/slow then sear skin). Saut\u00e9 the greens, shred the apple into a slaw. Serve crisp, salty and tangy."}], [{"name": "Cheesy Scrambled Eggs & Bacon", "tag": "Rich scrambled eggs with crispy bacon (dairy allowed here)", "time": "12 min", "ingredients": [["streaky bacon", "3 rashers", "protein"], ["pasture-raised eggs", "3", "protein"], ["mature cheddar", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["sourdough", "1 slice", "carbs"], ["chives", "a pinch", "herbs"]], "method": "Crisp the bacon. Scramble the eggs with butter and fold in the cheddar at the end. Toast, plate, top with chives."}, {"name": "Ground Beef & Bean Chilli Bowl", "tag": "Warm, mineral-rich chilli over rice with cheddar (dairy ok here)", "time": "35 min", "ingredients": [["ground beef", "250 g", "protein"], ["black beans", "1 tin (drained)", "carbs"], ["passata / crushed tomato", "200 ml", "pantry"], ["onion", "1", "vet"], ["garlic", "2 cloves", "pantry"], ["chilli powder + cumin", "1-2 tsp", "pantry"], ["cooked rice", "1 cup", "carbs"], ["cheddar", "30 g", "dairy"], ["oil", "1 tbsp", "fats"]], "method": "Brown the beef, add onion and garlic, spices, beans and passata; simmer 15-20 min. Serve over rice with cheddar on top."}, {"name": "Seared Scallops & Cauliflower Pur\u00e9e", "tag": "Silky cauliflower pur\u00e9e under golden scallops", "time": "30 min", "ingredients": [["scallops", "250 g", "protein"], ["cauliflower", "1 head", "vet"], ["butter", "2 tbsp", "fats"], ["milk or cream", "1/4 cup", "dairy"], ["lemon", "1/2", "pantry"], ["chives", "a pinch", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Boil and pur\u00e9e the cauliflower with butter and cream. Sear scallops 90s a side. Plate pur\u00e9e, top with scallops and lemon."}], [{"name": "Greek Yogurt, Honey & Berries Bowl", "tag": "The 2-minute high-protein no-cook breakfast", "time": "5 min", "ingredients": [["full-fat greek yogurt", "250 g", "dairy"], ["mixed berries", "1 cup", "fruit"], ["raw honey", "1 tbsp", "pantry"], ["flaked almonds", "2 tbsp", "pantry"], ["cinnamon", "a dash", "pantry"]], "method": "Bowl it, drizzle it, sprinkle it. Done in under five minutes."}, {"name": "Lamb & Feta Flatbread", "tag": "Herbed lamb mince, tomatoes and feta on a warm flatbread", "time": "25 min", "ingredients": [["ground lamb", "200 g", "protein"], ["flatbread / pitta", "2", "carbs"], ["tomatoes", "1", "vet"], ["cucumber", "1/2", "vet"], ["feta", "40 g", "dairy"], ["fresh mint or parsley", "a handful", "herbs"], ["plain yogurt (tzatziki)", "2 tbsp", "dairy"], ["olive oil", "1 tbsp", "fats"]], "method": "Season and brown the lamb. Warm the bread. Pile lamb, tomato, cucumber, feta and herbs on top; drizzle yogurt and oil."}, {"name": "Lamb Shanks in Red Wine", "tag": "Slow-braised fall-apart lamb \u2014 the one for a weekend", "time": "20 prep / slow-cook", "ingredients": [["lamb shanks", "2", "protein"], ["red wine", "200 ml", "pantry"], ["beef stock", "400 ml", "drinks"], ["carrot + celery + onion", "1 each", "vet"], ["tomato paste", "1 tbsp", "pantry"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the shanks, add veg, wine and stock, braise low for 2-3 hours till the meat falls off the bone. Serve with polenta or mash."}], [{"name": "Chicken & Sweet Potato Hash", "tag": "Shredded chicken, sweet potato and eggs \u2014 a hearty Sunday-style breakfast", "time": "20 min", "ingredients": [["cooked chicken (leftover)", "1 cup", "protein"], ["sweet potato", "1 medium", "carbs"], ["pasture-raised eggs", "2", "protein"], ["red onion", "1/4", "vet"], ["paprika", "1/2 tsp", "pantry"], ["oil or butter", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the sweet potato in butter, add onion and shredded chicken, push to the side and fry the eggs. Season with paprika."}, {"name": "Seared Salmon & Lime Salad", "tag": "Crispy-skinned salmon over a bright crunchy salad", "time": "20 min", "ingredients": [["salmon fillet", "180 g", "protein"], ["mixed greens", "2 handfuls", "vet"], ["cucumber", "1/2", "vet"], ["avocado", "1/2", "fats"], ["lime", "1/2", "pantry"], ["olive oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Sear the salmon skin-side down till crisp. Toss the greens, cucumber and avocado with lime and oil. Serve on top."}, {"name": "Salmon & Roasted Asparagus", "tag": "Simple, elegant, omega-3 rich", "time": "25 min", "ingredients": [["salmon fillet", "200 g", "protein"], ["asparagus", "1 bunch", "vet"], ["lemon", "1/2", "pantry"], ["butter or olive oil", "1 tbsp", "fats"], ["flaked almonds", "1 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the asparagus with oil. Pan-sear or roast the salmon to your liking. Toss with lemon and almonds."}], [{"name": "French Toast & Bacon", "tag": "The treat-day opener: egg-soaked sourdough, crispy bacon", "time": "15 min", "ingredients": [["sourdough bread", "2 thick slices", "carbs"], ["pasture-raised eggs", "2", "protein"], ["milk or cream", "1/4 cup", "dairy"], ["cinnamon", "1/2 tsp", "pantry"], ["butter", "1 tbsp", "fats"], ["streaky bacon", "3 rashers", "protein"], ["maple syrup", "1 tbsp", "pantry"]], "method": "Whisk egg + milk + cinnamon, soak the bread, fry golden in butter. Crisp the bacon in the same pan."}, {"name": "Crispy Chicken Thighs & Slaw", "tag": "Juicy roasted thighs over a tangy vinegar slaw", "time": "40 min", "ingredients": [["chicken thighs (bone-in)", "2", "protein"], ["white / red cabbage", "3 handfuls", "vet"], ["carrot", "1", "vet"], ["red onion", "1/4", "vet"], ["apple cider vinegar", "2 tbsp", "pantry"], ["olive oil", "1 tbsp", "fats"], ["mayonnaise", "2 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the thighs at 190\u00b0C for 35-40 min until crisp. Shred the cabbage with carrot and onion, toss with mayo + vinegar slaw. Serve."}, {"name": "Beef Burger (Homemade) & Sweet-Potato Fries", "tag": "Real beef patties, proper fries \u2014 comfort done right", "time": "30 min", "ingredients": [["ground beef (80/20)", "250 g", "protein"], ["sweet potatoes", "2 medium", "carbs"], ["brioche or burger bun", "1", "carbs"], ["cheddar", "30 g", "dairy"], ["lettuce + tomato + onion", "to serve", "vet"], ["smoked paprika", "1/2 tsp", "pantry"], ["oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Make the patties, season, grill. Cut sweet potatoes into fries, toss with paprika and oil, roast until crisp. Assemble the burger."}]], [[{"name": "Steak & Eggs with Sourdough", "tag": "The classic rescue \u2014 buttery eggs, seared steak, crisp sourdough", "time": "15 min", "ingredients": [["sirloin or ribeye", "150 g", "protein"], ["pasture-raised eggs", "3", "protein"], ["sourdough bread (gluten ok here)", "1-2 slices", "carbs"], ["butter or ghee", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Sear the steak to your liking, rest it. Fry the eggs in butter, toast the sourdough. Stack and finish with chives."}, {"name": "Chicken Caesar (Proper, with Anchovies)", "tag": "Grilled chicken, crisp romaine, real Caesar dressing, sourdough croutons", "time": "25 min", "ingredients": [["chicken breast", "150 g", "protein"], ["romaine lettuce", "1 head", "vet"], ["anchovy fillets", "3", "protein"], ["parmesan", "30 g", "dairy"], ["pasture-raised egg yolk", "1", "protein"], ["extra-virgin olive oil", "2 tbsp", "fats"], ["sourdough (croutons)", "1 slice", "carbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Grill the chicken. Mash anchovies + yolk + parmesan + oil into a dressing. Toss the romaine, top with sliced chicken and toasted croutons."}, {"name": "Sunday Roast Chicken & Gravy", "tag": "Whole roasted chicken, roast potatoes, veg and real gravy", "time": "15 prep / 60 roast", "ingredients": [["whole chicken", "1.4 kg", "protein"], ["potatoes", "600 g", "carbs"], ["carrots + parsnips", "2 of each", "vet"], ["onion", "1", "vet"], ["butter", "1 tbsp", "fats"], ["chicken stock", "400 ml", "drinks"], ["rosemary + thyme", "a sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Butter-and-season the chicken, roast with veg until golden (about 60 min at 190\u00b0C). Deglaze the pan with stock for gravy. Carve and serve.", "note": "Batch it: roast two birds, use leftovers for the week."}], [{"name": "Smoked Salmon & Soft Egg Plate", "tag": "Cafe breakfast: smoked salmon, soft eggs, avocado on sourdough", "time": "12 min", "ingredients": [["smoked salmon", "80 g", "protein"], ["pasture-raised eggs", "2", "protein"], ["avocado", "1/2", "fats"], ["sourdough", "1 slice", "carbs"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Toast the sourdough, mash avocado on top, pile on the salmon and a soft-poached egg. Season and squeeze lemon."}, {"name": "Garlic Butter Steak Bites & Potatoes", "tag": "Pan-seared steak bites with garlicky roasted potato chunks", "time": "25 min", "ingredients": [["sirloin", "200 g", "protein"], ["baby potatoes", "300 g", "carbs"], ["butter", "1 tbsp", "fats"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the halved potatoes. Sear the steak bites with garlic and rosemary in butter. Toss together, rest, serve."}, {"name": "Pan-Seared Ribeye with Blue-Cheese Butter", "tag": "The steakhouse dinner at home", "time": "25 min", "ingredients": [["ribeye steak", "250 g", "protein"], ["blue cheese", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["garlic", "1 clove", "pantry"], ["roast potatoes", "250 g", "carbs"], ["green beans", "1 handful", "vet"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the potatoes. Cook the steak to rare-medium, rest. Warm butter + blue cheese + garlic into a quick sauce. Serve with saut\u00e9d beans."}], [{"name": "Sausage, Pepper & Egg Fry-up", "tag": "A proper breakfast fry-up done in one pan", "time": "18 min", "ingredients": [["pork or beef sausages", "2", "protein"], ["pasture-raised eggs", "3", "protein"], ["bell peppers", "1", "vet"], ["onion", "1/4", "vet"], ["butter", "1 tbsp", "fats"], ["hot sauce (optional)", "to taste", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the sausages, add peppers and onion, then crack the eggs and fry until set. Slide into a heap on a plate."}, {"name": "Open-Faced Smoked Mackerel Toast", "tag": "Rich smoked mackerel, pickled onion and rocket on dark rye", "time": "10 min", "ingredients": [["smoked mackerel", "1 fillet", "protein"], ["dark rye bread", "2 slices", "carbs"], ["rocket leaves", "1 handful", "vet"], ["red onion (quick-pickled)", "1/4", "vet"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Pile rocket and mackerel on toasted rye, add pickled onion, squeeze lemon. A 10-minute lunch with real flavour."}, {"name": "Pork Belly & Crispy Greens", "tag": "Slow-crisped pork belly with charred greens and apple slaw", "time": "20 prep / slow-cook", "ingredients": [["pork belly (skin on)", "400 g", "protein"], ["apple cider vinegar", "1 tsp", "pantry"], ["kale or cabbage", "3 handfuls", "vet"], ["green apple", "1", "fruit"], ["olive oil", "1 tbsp", "fats"], ["fennel seeds", "1/2 tsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the pork belly (sous-vide/slow then sear skin). Saut\u00e9 the greens, shred the apple into a slaw. Serve crisp, salty and tangy."}], [{"name": "Cheesy Scrambled Eggs & Bacon", "tag": "Rich scrambled eggs with crispy bacon (dairy allowed here)", "time": "12 min", "ingredients": [["streaky bacon", "3 rashers", "protein"], ["pasture-raised eggs", "3", "protein"], ["mature cheddar", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["sourdough", "1 slice", "carbs"], ["chives", "a pinch", "herbs"]], "method": "Crisp the bacon. Scramble the eggs with butter and fold in the cheddar at the end. Toast, plate, top with chives."}, {"name": "Ground Beef & Bean Chilli Bowl", "tag": "Warm, mineral-rich chilli over rice with cheddar (dairy ok here)", "time": "35 min", "ingredients": [["ground beef", "250 g", "protein"], ["black beans", "1 tin (drained)", "carbs"], ["passata / crushed tomato", "200 ml", "pantry"], ["onion", "1", "vet"], ["garlic", "2 cloves", "pantry"], ["chilli powder + cumin", "1-2 tsp", "pantry"], ["cooked rice", "1 cup", "carbs"], ["cheddar", "30 g", "dairy"], ["oil", "1 tbsp", "fats"]], "method": "Brown the beef, add onion and garlic, spices, beans and passata; simmer 15-20 min. Serve over rice with cheddar on top."}, {"name": "Seared Scallops & Cauliflower Pur\u00e9e", "tag": "Silky cauliflower pur\u00e9e under golden scallops", "time": "30 min", "ingredients": [["scallops", "250 g", "protein"], ["cauliflower", "1 head", "vet"], ["butter", "2 tbsp", "fats"], ["milk or cream", "1/4 cup", "dairy"], ["lemon", "1/2", "pantry"], ["chives", "a pinch", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Boil and pur\u00e9e the cauliflower with butter and cream. Sear scallops 90s a side. Plate pur\u00e9e, top with scallops and lemon."}], [{"name": "Greek Yogurt, Honey & Berries Bowl", "tag": "The 2-minute high-protein no-cook breakfast", "time": "5 min", "ingredients": [["full-fat greek yogurt", "250 g", "dairy"], ["mixed berries", "1 cup", "fruit"], ["raw honey", "1 tbsp", "pantry"], ["flaked almonds", "2 tbsp", "pantry"], ["cinnamon", "a dash", "pantry"]], "method": "Bowl it, drizzle it, sprinkle it. Done in under five minutes."}, {"name": "Lamb & Feta Flatbread", "tag": "Herbed lamb mince, tomatoes and feta on a warm flatbread", "time": "25 min", "ingredients": [["ground lamb", "200 g", "protein"], ["flatbread / pitta", "2", "carbs"], ["tomatoes", "1", "vet"], ["cucumber", "1/2", "vet"], ["feta", "40 g", "dairy"], ["fresh mint or parsley", "a handful", "herbs"], ["plain yogurt (tzatziki)", "2 tbsp", "dairy"], ["olive oil", "1 tbsp", "fats"]], "method": "Season and brown the lamb. Warm the bread. Pile lamb, tomato, cucumber, feta and herbs on top; drizzle yogurt and oil."}, {"name": "Lamb Shanks in Red Wine", "tag": "Slow-braised fall-apart lamb \u2014 the one for a weekend", "time": "20 prep / slow-cook", "ingredients": [["lamb shanks", "2", "protein"], ["red wine", "200 ml", "pantry"], ["beef stock", "400 ml", "drinks"], ["carrot + celery + onion", "1 each", "vet"], ["tomato paste", "1 tbsp", "pantry"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the shanks, add veg, wine and stock, braise low for 2-3 hours till the meat falls off the bone. Serve with polenta or mash."}], [{"name": "Chicken & Sweet Potato Hash", "tag": "Shredded chicken, sweet potato and eggs \u2014 a hearty Sunday-style breakfast", "time": "20 min", "ingredients": [["cooked chicken (leftover)", "1 cup", "protein"], ["sweet potato", "1 medium", "carbs"], ["pasture-raised eggs", "2", "protein"], ["red onion", "1/4", "vet"], ["paprika", "1/2 tsp", "pantry"], ["oil or butter", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the sweet potato in butter, add onion and shredded chicken, push to the side and fry the eggs. Season with paprika."}, {"name": "Seared Salmon & Lime Salad", "tag": "Crispy-skinned salmon over a bright crunchy salad", "time": "20 min", "ingredients": [["salmon fillet", "180 g", "protein"], ["mixed greens", "2 handfuls", "vet"], ["cucumber", "1/2", "vet"], ["avocado", "1/2", "fats"], ["lime", "1/2", "pantry"], ["olive oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Sear the salmon skin-side down till crisp. Toss the greens, cucumber and avocado with lime and oil. Serve on top."}, {"name": "Salmon & Roasted Asparagus", "tag": "Simple, elegant, omega-3 rich", "time": "25 min", "ingredients": [["salmon fillet", "200 g", "protein"], ["asparagus", "1 bunch", "vet"], ["lemon", "1/2", "pantry"], ["butter or olive oil", "1 tbsp", "fats"], ["flaked almonds", "1 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the asparagus with oil. Pan-sear or roast the salmon to your liking. Toss with lemon and almonds."}], [{"name": "French Toast & Bacon", "tag": "The treat-day opener: egg-soaked sourdough, crispy bacon", "time": "15 min", "ingredients": [["sourdough bread", "2 thick slices", "carbs"], ["pasture-raised eggs", "2", "protein"], ["milk or cream", "1/4 cup", "dairy"], ["cinnamon", "1/2 tsp", "pantry"], ["butter", "1 tbsp", "fats"], ["streaky bacon", "3 rashers", "protein"], ["maple syrup", "1 tbsp", "pantry"]], "method": "Whisk egg + milk + cinnamon, soak the bread, fry golden in butter. Crisp the bacon in the same pan."}, {"name": "Crispy Chicken Thighs & Slaw", "tag": "Juicy roasted thighs over a tangy vinegar slaw", "time": "40 min", "ingredients": [["chicken thighs (bone-in)", "2", "protein"], ["white / red cabbage", "3 handfuls", "vet"], ["carrot", "1", "vet"], ["red onion", "1/4", "vet"], ["apple cider vinegar", "2 tbsp", "pantry"], ["olive oil", "1 tbsp", "fats"], ["mayonnaise", "2 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the thighs at 190\u00b0C for 35-40 min until crisp. Shred the cabbage with carrot and onion, toss with mayo + vinegar slaw. Serve."}, {"name": "Beef Burger (Homemade) & Sweet-Potato Fries", "tag": "Real beef patties, proper fries \u2014 comfort done right", "time": "30 min", "ingredients": [["ground beef (80/20)", "250 g", "protein"], ["sweet potatoes", "2 medium", "carbs"], ["brioche or burger bun", "1", "carbs"], ["cheddar", "30 g", "dairy"], ["lettuce + tomato + onion", "to serve", "vet"], ["smoked paprika", "1/2 tsp", "pantry"], ["oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Make the patties, season, grill. Cut sweet potatoes into fries, toss with paprika and oil, roast until crisp. Assemble the burger."}]], [[{"name": "Steak & Eggs with Sourdough", "tag": "The classic rescue \u2014 buttery eggs, seared steak, crisp sourdough", "time": "15 min", "ingredients": [["sirloin or ribeye", "150 g", "protein"], ["pasture-raised eggs", "3", "protein"], ["sourdough bread (gluten ok here)", "1-2 slices", "carbs"], ["butter or ghee", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Sear the steak to your liking, rest it. Fry the eggs in butter, toast the sourdough. Stack and finish with chives."}, {"name": "Chicken Caesar (Proper, with Anchovies)", "tag": "Grilled chicken, crisp romaine, real Caesar dressing, sourdough croutons", "time": "25 min", "ingredients": [["chicken breast", "150 g", "protein"], ["romaine lettuce", "1 head", "vet"], ["anchovy fillets", "3", "protein"], ["parmesan", "30 g", "dairy"], ["pasture-raised egg yolk", "1", "protein"], ["extra-virgin olive oil", "2 tbsp", "fats"], ["sourdough (croutons)", "1 slice", "carbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Grill the chicken. Mash anchovies + yolk + parmesan + oil into a dressing. Toss the romaine, top with sliced chicken and toasted croutons."}, {"name": "Sunday Roast Chicken & Gravy", "tag": "Whole roasted chicken, roast potatoes, veg and real gravy", "time": "15 prep / 60 roast", "ingredients": [["whole chicken", "1.4 kg", "protein"], ["potatoes", "600 g", "carbs"], ["carrots + parsnips", "2 of each", "vet"], ["onion", "1", "vet"], ["butter", "1 tbsp", "fats"], ["chicken stock", "400 ml", "drinks"], ["rosemary + thyme", "a sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Butter-and-season the chicken, roast with veg until golden (about 60 min at 190\u00b0C). Deglaze the pan with stock for gravy. Carve and serve.", "note": "Batch it: roast two birds, use leftovers for the week."}], [{"name": "Smoked Salmon & Soft Egg Plate", "tag": "Cafe breakfast: smoked salmon, soft eggs, avocado on sourdough", "time": "12 min", "ingredients": [["smoked salmon", "80 g", "protein"], ["pasture-raised eggs", "2", "protein"], ["avocado", "1/2", "fats"], ["sourdough", "1 slice", "carbs"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"], ["chives", "a pinch", "herbs"]], "method": "Toast the sourdough, mash avocado on top, pile on the salmon and a soft-poached egg. Season and squeeze lemon."}, {"name": "Garlic Butter Steak Bites & Potatoes", "tag": "Pan-seared steak bites with garlicky roasted potato chunks", "time": "25 min", "ingredients": [["sirloin", "200 g", "protein"], ["baby potatoes", "300 g", "carbs"], ["butter", "1 tbsp", "fats"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the halved potatoes. Sear the steak bites with garlic and rosemary in butter. Toss together, rest, serve."}, {"name": "Pan-Seared Ribeye with Blue-Cheese Butter", "tag": "The steakhouse dinner at home", "time": "25 min", "ingredients": [["ribeye steak", "250 g", "protein"], ["blue cheese", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["garlic", "1 clove", "pantry"], ["roast potatoes", "250 g", "carbs"], ["green beans", "1 handful", "vet"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the potatoes. Cook the steak to rare-medium, rest. Warm butter + blue cheese + garlic into a quick sauce. Serve with saut\u00e9d beans."}], [{"name": "Sausage, Pepper & Egg Fry-up", "tag": "A proper breakfast fry-up done in one pan", "time": "18 min", "ingredients": [["pork or beef sausages", "2", "protein"], ["pasture-raised eggs", "3", "protein"], ["bell peppers", "1", "vet"], ["onion", "1/4", "vet"], ["butter", "1 tbsp", "fats"], ["hot sauce (optional)", "to taste", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the sausages, add peppers and onion, then crack the eggs and fry until set. Slide into a heap on a plate."}, {"name": "Open-Faced Smoked Mackerel Toast", "tag": "Rich smoked mackerel, pickled onion and rocket on dark rye", "time": "10 min", "ingredients": [["smoked mackerel", "1 fillet", "protein"], ["dark rye bread", "2 slices", "carbs"], ["rocket leaves", "1 handful", "vet"], ["red onion (quick-pickled)", "1/4", "vet"], ["lemon", "1/2", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Pile rocket and mackerel on toasted rye, add pickled onion, squeeze lemon. A 10-minute lunch with real flavour."}, {"name": "Pork Belly & Crispy Greens", "tag": "Slow-crisped pork belly with charred greens and apple slaw", "time": "20 prep / slow-cook", "ingredients": [["pork belly (skin on)", "400 g", "protein"], ["apple cider vinegar", "1 tsp", "pantry"], ["kale or cabbage", "3 handfuls", "vet"], ["green apple", "1", "fruit"], ["olive oil", "1 tbsp", "fats"], ["fennel seeds", "1/2 tsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the pork belly (sous-vide/slow then sear skin). Saut\u00e9 the greens, shred the apple into a slaw. Serve crisp, salty and tangy."}], [{"name": "Cheesy Scrambled Eggs & Bacon", "tag": "Rich scrambled eggs with crispy bacon (dairy allowed here)", "time": "12 min", "ingredients": [["streaky bacon", "3 rashers", "protein"], ["pasture-raised eggs", "3", "protein"], ["mature cheddar", "30 g", "dairy"], ["butter", "1 tbsp", "fats"], ["sourdough", "1 slice", "carbs"], ["chives", "a pinch", "herbs"]], "method": "Crisp the bacon. Scramble the eggs with butter and fold in the cheddar at the end. Toast, plate, top with chives."}, {"name": "Ground Beef & Bean Chilli Bowl", "tag": "Warm, mineral-rich chilli over rice with cheddar (dairy ok here)", "time": "35 min", "ingredients": [["ground beef", "250 g", "protein"], ["black beans", "1 tin (drained)", "carbs"], ["passata / crushed tomato", "200 ml", "pantry"], ["onion", "1", "vet"], ["garlic", "2 cloves", "pantry"], ["chilli powder + cumin", "1-2 tsp", "pantry"], ["cooked rice", "1 cup", "carbs"], ["cheddar", "30 g", "dairy"], ["oil", "1 tbsp", "fats"]], "method": "Brown the beef, add onion and garlic, spices, beans and passata; simmer 15-20 min. Serve over rice with cheddar on top."}, {"name": "Seared Scallops & Cauliflower Pur\u00e9e", "tag": "Silky cauliflower pur\u00e9e under golden scallops", "time": "30 min", "ingredients": [["scallops", "250 g", "protein"], ["cauliflower", "1 head", "vet"], ["butter", "2 tbsp", "fats"], ["milk or cream", "1/4 cup", "dairy"], ["lemon", "1/2", "pantry"], ["chives", "a pinch", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Boil and pur\u00e9e the cauliflower with butter and cream. Sear scallops 90s a side. Plate pur\u00e9e, top with scallops and lemon."}], [{"name": "Greek Yogurt, Honey & Berries Bowl", "tag": "The 2-minute high-protein no-cook breakfast", "time": "5 min", "ingredients": [["full-fat greek yogurt", "250 g", "dairy"], ["mixed berries", "1 cup", "fruit"], ["raw honey", "1 tbsp", "pantry"], ["flaked almonds", "2 tbsp", "pantry"], ["cinnamon", "a dash", "pantry"]], "method": "Bowl it, drizzle it, sprinkle it. Done in under five minutes."}, {"name": "Lamb & Feta Flatbread", "tag": "Herbed lamb mince, tomatoes and feta on a warm flatbread", "time": "25 min", "ingredients": [["ground lamb", "200 g", "protein"], ["flatbread / pitta", "2", "carbs"], ["tomatoes", "1", "vet"], ["cucumber", "1/2", "vet"], ["feta", "40 g", "dairy"], ["fresh mint or parsley", "a handful", "herbs"], ["plain yogurt (tzatziki)", "2 tbsp", "dairy"], ["olive oil", "1 tbsp", "fats"]], "method": "Season and brown the lamb. Warm the bread. Pile lamb, tomato, cucumber, feta and herbs on top; drizzle yogurt and oil."}, {"name": "Lamb Shanks in Red Wine", "tag": "Slow-braised fall-apart lamb \u2014 the one for a weekend", "time": "20 prep / slow-cook", "ingredients": [["lamb shanks", "2", "protein"], ["red wine", "200 ml", "pantry"], ["beef stock", "400 ml", "drinks"], ["carrot + celery + onion", "1 each", "vet"], ["tomato paste", "1 tbsp", "pantry"], ["garlic", "2 cloves", "pantry"], ["rosemary", "1 sprig", "herbs"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Brown the shanks, add veg, wine and stock, braise low for 2-3 hours till the meat falls off the bone. Serve with polenta or mash."}], [{"name": "Chicken & Sweet Potato Hash", "tag": "Shredded chicken, sweet potato and eggs \u2014 a hearty Sunday-style breakfast", "time": "20 min", "ingredients": [["cooked chicken (leftover)", "1 cup", "protein"], ["sweet potato", "1 medium", "carbs"], ["pasture-raised eggs", "2", "protein"], ["red onion", "1/4", "vet"], ["paprika", "1/2 tsp", "pantry"], ["oil or butter", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Crisp the sweet potato in butter, add onion and shredded chicken, push to the side and fry the eggs. Season with paprika."}, {"name": "Seared Salmon & Lime Salad", "tag": "Crispy-skinned salmon over a bright crunchy salad", "time": "20 min", "ingredients": [["salmon fillet", "180 g", "protein"], ["mixed greens", "2 handfuls", "vet"], ["cucumber", "1/2", "vet"], ["avocado", "1/2", "fats"], ["lime", "1/2", "pantry"], ["olive oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Sear the salmon skin-side down till crisp. Toss the greens, cucumber and avocado with lime and oil. Serve on top."}, {"name": "Salmon & Roasted Asparagus", "tag": "Simple, elegant, omega-3 rich", "time": "25 min", "ingredients": [["salmon fillet", "200 g", "protein"], ["asparagus", "1 bunch", "vet"], ["lemon", "1/2", "pantry"], ["butter or olive oil", "1 tbsp", "fats"], ["flaked almonds", "1 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the asparagus with oil. Pan-sear or roast the salmon to your liking. Toss with lemon and almonds."}], [{"name": "French Toast & Bacon", "tag": "The treat-day opener: egg-soaked sourdough, crispy bacon", "time": "15 min", "ingredients": [["sourdough bread", "2 thick slices", "carbs"], ["pasture-raised eggs", "2", "protein"], ["milk or cream", "1/4 cup", "dairy"], ["cinnamon", "1/2 tsp", "pantry"], ["butter", "1 tbsp", "fats"], ["streaky bacon", "3 rashers", "protein"], ["maple syrup", "1 tbsp", "pantry"]], "method": "Whisk egg + milk + cinnamon, soak the bread, fry golden in butter. Crisp the bacon in the same pan."}, {"name": "Crispy Chicken Thighs & Slaw", "tag": "Juicy roasted thighs over a tangy vinegar slaw", "time": "40 min", "ingredients": [["chicken thighs (bone-in)", "2", "protein"], ["white / red cabbage", "3 handfuls", "vet"], ["carrot", "1", "vet"], ["red onion", "1/4", "vet"], ["apple cider vinegar", "2 tbsp", "pantry"], ["olive oil", "1 tbsp", "fats"], ["mayonnaise", "2 tbsp", "pantry"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Roast the thighs at 190\u00b0C for 35-40 min until crisp. Shred the cabbage with carrot and onion, toss with mayo + vinegar slaw. Serve."}, {"name": "Beef Burger (Homemade) & Sweet-Potato Fries", "tag": "Real beef patties, proper fries \u2014 comfort done right", "time": "30 min", "ingredients": [["ground beef (80/20)", "250 g", "protein"], ["sweet potatoes", "2 medium", "carbs"], ["brioche or burger bun", "1", "carbs"], ["cheddar", "30 g", "dairy"], ["lettuce + tomato + onion", "to serve", "vet"], ["smoked paprika", "1/2 tsp", "pantry"], ["oil", "1 tbsp", "fats"], ["sea salt + pepper", "to taste", "pantry"]], "method": "Make the patties, season, grill. Cut sweet potatoes into fries, toss with paprika and oil, roast until crisp. Assemble the burger."}]]];
+var CAT_ICON = {"protein": "🥩", "vet": "🥦", "fruit": "🍒", "carbs": "🍚", "fats": "🫒", "pantry": "🧂", "drinks": "🍵", "herbs": "🌿", "dairy": "🧀"};
+var CAT_LABEL = {"protein": "Protein", "vet": "Vegetables", "fruit": "Fruit", "carbs": "Carbs & Grains", "fats": "Good fats", "pantry": "Pantry", "drinks": "Broths & Drinkables", "herbs": "Herbs & Seasoning", "dairy": "Dairy"};
+var CAT_ORDER = ["protein", "vet", "fruit", "carbs", "fats", "pantry", "drinks", "dairy", "herbs"];
+
+var curWeek = 0;
+var selection = WEEKS.map(function(w){return new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);});
+var WEEKNAMES = ["Week 1","Week 2","Week 3"];
+var DAYNAMES = ["Day 1","Day 2","Day 3","Day 4","Day 5","Day 6","Day 7"];
+var SLOT = {0:"Breakfast",1:"Lunch",2:"Dinner"};
+
+function q(s){return document.querySelector(s);}
+function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+
+function renderTabs(){
+  var html = "";
+  for(var i=0;i<WEEKS.length;i++){
+    html += '<button class="tab'+(i===curWeek?' on':'')+'" data-w="'+i+'">'+WEEKNAMES[i]+'</button>';
+  }
+  q("#tabs").innerHTML = html;
+  qa(".tab").forEach(function(b){
+    b.onclick = function(){curWeek = +b.getAttribute("data-w"); renderTabs(); renderDays(); updateCount();};
+  });
+}
+
+function ingRow(ing){
+  var name=ing[0], amt=ing[1], cat=ing[2];
+  return '<li><span class="ic">'+(CAT_ICON[cat]||'\u2022')+'</span><span class="nm">'+esc(name)+'</span>'
+    +'<span class="amt">'+esc(amt)+'</span></li>';
+}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function renderDays(){
+  var week = WEEKS[curWeek], html = "";
+  for(var di=0; di<7; di++){
+    var day = week[di], cells = "";
+    for(var si=0; si<3; si++){
+      var meal = day[si], mi = di*3+si;
+      var on = selection[curWeek].has(mi);
+      var ing = meal.ingredients.map(ingRow).join("");
+      var note = meal.note ? '<p class="note">'+esc(meal.note)+'</p>' : '';
+      var supps = meal.supps ? '<div class="supps">Supps: '+esc(meal.supps)+'</div>' : '';
+      cells += '<div class="meal">'
+        +'<div class="slot">'+SLOT[si]+'</div>'
+        +'<h3>'+esc(meal.name)+'</h3>'
+        +'<p class="tag">'+esc(meal.tag)+'</p>'
+        +'<ul class="ing">'+ing+'</ul>'
+        +'<div class="method">'+esc(meal.method)+'</div>'
+        +note+supps
+        +'<label class="chk"><input type="checkbox" data-w="'+curWeek+'" data-mi="'+mi+'"'+(on?' checked':'')+'>'
+        +' Include in this week\u2019s shopping list</label></div>';
+    }
+    html += '<div class="day"><div class="day-head"><span class="dn">'+DAYNAMES[di]+'</span>'
+      +'<span class="dt">'+SLOT[0]+' / '+SLOT[1]+' / '+SLOT[2]+'</span></div>'
+      +'<div class="day-cols">'+cells+'</div></div>';
+  }
+  q("#days").innerHTML = html;
+  qa(".chk input").forEach(function(cb){
+    cb.onchange = function(){ var w=+cb.getAttribute("data-w"), mi=+cb.getAttribute("data-mi");
+      if(cb.checked) selection[w].add(mi); else selection[w].delete(mi); updateCount(); };
+  });
+}
+
+function aggregate(){
+  var week = WEEKS[curWeek], counts = {};
+  var picked = Array.from(selection[curWeek]);
+  picked.forEach(function(mi){
+    var meal = week[Math.floor(mi/3)][mi%3];
+    meal.ingredients.forEach(function(ing){
+      var name=ing[0], amt=ing[1], cat=ing[2];
+      var key = cat+'|'+name;
+      if(!counts[key]) counts[key] = {name:name, amt:amt, cat:cat, times:0};
+      counts[key].times++;
+    });
+  });
+  var list = Object.keys(counts).map(function(k){return counts[k];});
+  list.sort(function(a,b){ return CAT_ORDER.indexOf(a.cat)-CAT_ORDER.indexOf(b.cat) || a.name.localeCompare(b.name); });
+  return list;
+}
+
+function updateCount(){
+  var n = selection[curWeek].size;
+  q("#shopCount").textContent = n + (n===1?' meal selected in ':' meals selected in ')+WEEKNAMES[curWeek]+'.';
+}
+
+function renderShop(){
+  var list = aggregate(), byCat = {}, html = "", txt = "";
+  list.forEach(function(it){ (byCat[it.cat]=byCat[it.cat]||[]).push(it); });
+  var catCount = Object.keys(byCat).length;
+  q("#shopSub").textContent = WEEKNAMES[curWeek]+' — '+list.length+' items across '+catCount+' categories. Tick meals in the week above to adjust.';
+  CAT_ORDER.forEach(function(c){
+    if(!byCat[c]) return;
+    html += '<div class="cat">'+CAT_LABEL[c]+'</div>';
+    byCat[c].forEach(function(it){
+      html += '<div class="row"><span><b>'+esc(it.name)+'</b> <span class="rq">'+esc(it.amt)
+        +(it.times>1? ' (appears '+it.times+' times)':'')+'</span></span>'
+        +'<span class="rq">'+(CAT_ICON[it.cat]||'')+'</span></div>';
+    });
+    txt += '\n'+String(CAT_LABEL[c]).toUpperCase()+'\n';
+    byCat[c].forEach(function(it){
+      txt += '  \u2713 '+it.name+' ('+it.amt+(it.times>1? ' x'+it.times:'')+')\n';
+    });
+  });
+  if(!html) html = '<p class="sub">Nothing selected &#8212; tick meals in a week to build a list.</p>';
+  q("#shopList").innerHTML = html;
+  txt = (WEEKNAMES[curWeek]+' \u2014 SHOPPING LIST\n') + txt;
+  q("#taOut").value = txt;
+}
+
+q("#openShop").onclick = function(){ renderShop(); q("#overlay").classList.add("open"); q("#closeShop").focus(); };
+q("#closeShop").onclick = function(){ q("#overlay").classList.remove("open"); };
+q("#overlay").onclick = function(e){ if(e.target===q("#overlay")) q("#overlay").classList.remove("open"); };
+q("#printShop").onclick = function(){ renderShop(); window.print(); };
+q("#copyShop").onclick = function(){
+  renderShop();
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(q("#taOut").value).then(function(){
+      q("#copyShop").textContent = "Copied \u2713";
+      setTimeout(function(){ q("#copyShop").textContent = "Copy as text"; },1500);
+    });
+  } else {
+    q("#taOut").select();
+  }
+};
+
+renderTabs(); renderDays(); updateCount();
+</script></body></html>

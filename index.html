@@ -118,6 +118,7 @@ details.recipe .m{font-size:13px;color:var(--mut);margin:8px 0 0}
   position:relative;top:3px}
 .srow.done .tick{border-color:var(--accent);background:var(--accent)}
 .srow.done .nm{opacity:.5;text-decoration:line-through}
+.srow.out{opacity:.38}
 .srow.phaserow{cursor:default;opacity:.62}
 .btn.ghost{background:var(--card);color:var(--fg);border:1px solid var(--line)}
 
@@ -155,8 +156,7 @@ footer{padding:30px 0 20px;color:var(--mut);font-size:12.5px;text-align:center}
 <div class="toolbar"><div class="wrap toolbar-row">
   <div class="seg" id="planSeg" role="tablist" aria-label="Meal plan"></div>
   <div class="seg" id="weekSeg" aria-label="Week"></div>
-  <button class="tabbtn" id="suppBtn" style="display:none">Supplements</button>
-  <button class="tabbtn" id="routBtn">Routines</button>
+  <button class="tabbtn" id="suppRoutBtn">Routines &amp; Supplements</button>
   <a class="tabbtn" id="pinBtn" href="https://pin.it/3SK77URPL" target="_blank" rel="noopener">&#128086; Mood board</a>
   <span class="spacer"></span>
   <div class="bulk">
@@ -194,7 +194,7 @@ footer{padding:30px 0 20px;color:var(--mut);font-size:12.5px;text-align:center}
 
 <div class="toast" id="toast"></div>
 
-<script src="meals-data.js?v=21"></script>
+<script src="meals-data.js?v=22"></script>
 <script>
 "use strict";
 var LS="mealplanner-v2";
@@ -269,7 +269,7 @@ function renderDays(){
         +'<p class="m">'+esc(meal.method)+'</p></details>'
         +'</div>';
     }).join("");
-    html+='<div class="day" id="day'+di+'"><div class="day-head" data-di="'+di+'" title="Tap to include/exclude the whole day">'
+    html+='<div class="day" id="day'+di+'"><div class="day-head" data-di="'+di+'" role="button" tabindex="0" title="Tap to include/exclude the whole day">'
       +'<span class="dn">'+DN[di]+'</span><span class="dc">'+n+'/3 meals</span>'
       +'<span class="dtoggle">'+(n===3?"Exclude day":n===0?"Include day":"Toggle day")+'</span></div>'
       +'<div class="day-cols">'+cells+'</div></div>';
@@ -292,13 +292,15 @@ function renderDays(){
     el.onkeydown=function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();toggle();}};
   });
   q("#days").querySelectorAll(".day-head").forEach(function(h){
-    h.onclick=function(){
+    var toggleDay=function(){
       var di=+h.dataset.di,a=inclArr(),on=0;
       for(var s=0;s<3;s++)if(a[di*3+s])on++;
       var target=on>=3?false:true;   // full day -> exclude, else include all
       for(var s2=0;s2<3;s2++)a[di*3+s2]=target;
       save();renderDays();updateCounts();
     };
+    h.onclick=toggleDay;
+    h.onkeydown=function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();toggleDay();}};
   });
 }
 function updateCounts(){
@@ -308,7 +310,6 @@ function updateCounts(){
 }
 function renderMast(){
   var p=P();
-  q("#suppBtn").style.display=(p.suppGuide&&p.suppGuide.length)?"":"none";
   q("#mKicker").textContent=p.kicker;
   q("#mName").textContent=p.name;
   q("#mLede").innerHTML=p.lede;
@@ -379,9 +380,9 @@ function openSheet(){
 }
 function closeSheet(){q("#ov").classList.remove("open");}
 
-/* ---------- supplements sheet ---------- */
+/* ---------- routines & supplements sheet ---------- */
 function loadTicks(){
-  try{ticks=JSON.parse(localStorage.getItem("mp-ticks-"+todayKey())||"{}");}catch(e){ticks={};}
+  try{ticks=JSON.parse(localStorage.getItem("mp-ticks")||"{}");}catch(e){ticks={};}
   if(window.__remoteState&&window.__remoteState.day===todayKey()&&window.__remoteState.ticks){
     var r=window.__remoteState.ticks, merged={};
     Object.keys(r).forEach(function(k){merged[k]=true;});
@@ -390,90 +391,59 @@ function loadTicks(){
   }
 }
 fetch("/state").then(function(r){return r.json();}).then(function(st){window.__remoteState=st;}).catch(function(){});
+function timeBucket(text){
+  var s=String(text||'').toLowerCase();
+  if(/morning|on waking|breakfast/.test(s))return "Morning";
+  if(/midday|mid-day|lunch|after lunch/.test(s))return "Midday";
+  if(/evening|bed|before bed|after dinner/.test(s))return "Evening";
+  return "Flexible timing";
+}
+function routineBucket(item){
+  var s=(item[0]+" "+item[1]+" "+item[2]).toLowerCase();
+  if(/dry brushing/.test(s))return "Morning";
+  if(/coconut oil pulling|morning tea|regular black tea/.test(s))return "Morning";
+  if(/blackseed oil pulling|legs up|castor oil|mobility|stretching|chamomile/.test(s))return /evening|bed/.test(s)?"Evening":"Flexible timing";
+  return "Flexible timing";
+}
+function groupBucket(group){return timeBucket(group);}
 function openSupps(){
   loadTicks();
-  var D=window.MEAL_DATA, g=(D.suppGroups&&D.suppGroups.length)?D.suppGroups:(P().suppGuide||[]);
+  var D=window.MEAL_DATA, g=(D.suppGroups&&D.suppGroups.length)?D.suppGroups:(P().suppGuide||[]), buckets={"Morning":[],"Midday":[],"Evening":[],"Flexible timing":[]};
+  g.forEach(function(grp){var b=groupBucket(grp.group);buckets[b].push({type:"suppGroup",value:grp});});
+  (D.rituals||[]).forEach(function(r){buckets[timeBucket(r.when)].push({type:"ritual",value:r});});
+  (D.routines||[]).forEach(function(grp){(grp.items||[]).forEach(function(it){buckets[routineBucket(it)].push({type:"routine",value:it});});});
   var teas=D.teas||[];
-  if(teas.length){
-    html='';
-    var thtml='<div class="sgroup">Teas (between meals)</div>';
-    teas.forEach(function(t){
-      thtml+='<div class="srow" data-k="tea:'+t.name+'"><span class="tick"></span><span><b>'+esc(t.name)+
-        '</b> <span class="when">'+esc(t.when)+'</span><br><span class="why">'+esc(t.amt+' — '+t.why)+'</span></span></div>';
-    });
-    html+=thtml;
-  }
-  var rituals=D.rituals||[];
-  if(rituals.length){
-    html+='<div class="sgroup">Daily rituals</div>';
-    rituals.forEach(function(r){
-      html+='<div class="srow" data-k="rit:'+r.name+'"><span class="tick"></span><span><b>'+esc(r.name)+'</b> <span class="when">'+esc(r.when)+'</span>'
-        +'<br><span class="why">'+esc(r.text||r.why||'')+(r.note?' '+esc(r.note):'')+'</span></span></div>';
-    });
-  }
-  g.forEach(function(grp){
-    html+='<div class="sgroup">'+esc(grp.group)+(grp.kind==='phase'?' <span class="badge phase">protocol phase</span>':' <span class="badge daily">daily</span>')+'</div>';
-    (grp.items||[]).forEach(function(it){
-      var isPhase=grp.kind==='phase';
-      html+='<div class="srow'+(isPhase?' phaserow':'')+'"'+(isPhase?'':' data-k="supp:'+it[0]+'"')+'><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[2])+'</span>'
-        +'<br><span class="why">'+esc(it[3])+'</span></span>'
-        +'<span class="dose">'+esc(it[1])+'</span></div>';
-    });
+  if(teas.length)buckets.Morning.push({type:"teaOptions",value:teas});
+  var order=["Morning","Midday","Evening","Flexible timing"],html="";
+  order.forEach(function(bucket){
+    var items=buckets[bucket], supp=items.filter(function(x){return x.type==='suppGroup';}), routines=items.filter(function(x){return x.type!=='suppGroup';});
+    if(!items.length)return;
+    html+='<div class="sgroup">'+bucket+'</div>';
+    html+='<div class="snote">Supplements</div>';
+    if(!supp.length)html+='<p class="snote">None scheduled.</p>';
+    supp.forEach(function(entry){var grp=entry.value,isPhase=grp.kind==='phase';html+='<div class="snote">'+esc(grp.group)+(isPhase?' — protocol phase':'')+'</div>';
+      (grp.items||[]).forEach(function(it){html+='<div class="srow" data-k="supp:'+it[0]+'"><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[2])+'</span><br><span class="why">'+esc(it[3])+'</span></span><span class="dose">'+esc(it[1])+'</span></div>';});});
+    html+='<div class="snote">Routines</div>';
+    if(!routines.length)html+='<p class="snote">None scheduled.</p>';
+    routines.forEach(function(entry){if(entry.type==='teaOptions'){html+='<div class="srow" data-k="tea-options"><span class="tick"></span><span><b>Tea options</b> <span class="when">Morning or evening</span><br><span class="why">'+esc(entry.value.map(function(t){return t.name;}).join(', '))+'</span></span></div>';return;}var x=entry.value,k=entry.type==='ritual'?'rit:'+x.name:'rout:'+x[0],name=entry.type==='ritual'?x.name:x[0],when=entry.type==='ritual'?x.when:x[1],why=entry.type==='ritual'?(x.text||x.why||'')+((x.note?' '+x.note:'')):x[2];html+='<div class="srow" data-k="'+esc(k)+'"><span class="tick"></span><span><b>'+esc(name)+'</b> <span class="when">'+esc(when)+'</span><br><span class="why">'+esc(why)+'</span></span></div>';});
   });
   if(P().suppsNote) html+='<p class="snote">'+esc(P().suppsNote)+'</p>';
   q("#shList").innerHTML=html;
   wireTicks();
-  q("#shTitle").textContent="Supplements — "+P().short+" protocol";
-  q("#shSub").textContent="Tick the daily ones as you take them. Phase-tagged items are managed by the protocol — greyed until active.";
-  q("#ov").classList.add("open");
-  return;
-  /* legacy renderer kept below for fallback */
-  var p=P(), g2=p.suppGuide||[];
-  q("#shTitle").textContent="Supplements — "+p.short+" protocol";
-  q("#shSub").textContent="Complete guide: what, dose, timing and why. Per-meal reminders also appear on each meal card.";
-  var html="";
-  g.forEach(function(grp){
-    html+='<div class="sgroup">'+esc(grp.group)+'</div>';
-    grp.items.forEach(function(it){
-      html+='<div class="srow"><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[2])+'</span>'
-        +'<br><span class="why">'+esc(it[3])+'</span></span>'
-        +'<span class="dose">'+esc(it[1])+'</span></div>';
-    });
-  });
-  if(p.suppsNote) html+='<p class="snote">'+esc(p.suppsNote)+'</p>';
-  if(!g.length) html='<p class="snote">No supplement protocol for this plan — it is the whole-food break, not the healing protocol.</p>';
-  q("#shList").innerHTML=html;
+  q("#shTitle").textContent="Routines & Supplements";
+  q("#shSub").textContent="Tap an item to exclude or include it. Exclusions persist until you toggle them again. Protocol-phase labels show when an item is intended to be used.";
   q("#ov").classList.add("open");
 }
-q("#suppBtn").onclick=openSupps;
-
-/* ---------- routines sheet ---------- */
-function openRoutines(){
-  loadTicks();
-  var D=window.MEAL_DATA, html='';
-  (D.routines||[]).forEach(function(grp){
-    html+='<div class="sgroup">'+esc(grp.group)+'</div>';
-    (grp.items||[]).forEach(function(it){
-      html+='<div class="srow" data-k="rout:'+it[0]+'"><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[1])+'</span>'
-        +'<br><span class="why">'+esc(it[2])+'</span></span></div>';
-    });
-  });
-  q("#shTitle").textContent="Daily routines";
-  q("#shSub").textContent="Non-food practices: oral care, oil pulling, lymph flow, evening mobility.";
-  q("#shList").innerHTML=html;
-  wireTicks();
-  q("#ov").classList.add("open");
-}
-q("#routBtn").onclick=openRoutines;
+q("#suppRoutBtn").onclick=openSupps;
 
 /* ---------- check-off persistence (cross-device via /state when available) ---------- */
 var ticks={};
 try{ticks=JSON.parse(localStorage.getItem("mp-ticks")||"{}");}catch(e){}
 function saveTicks(){
-  localStorage.setItem("mp-ticks-"+todayKey(), JSON.stringify(ticks));
+  localStorage.setItem("mp-ticks", JSON.stringify(ticks));
   if(window.__stateSave) window.__stateSave({ticks:ticks, day:todayKey()});
 }
-function todayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function todayKey(){return "persistent";}
 window.__stateSave=function(obj){
   try{fetch("/state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj)});}catch(e){}
 };
@@ -483,11 +453,11 @@ window.__stateLoad=function(cb){
 function wireTicks(){
   q("#shList").querySelectorAll(".srow[data-k]").forEach(function(row){
     var k=row.getAttribute("data-k");
-    if(ticks[k])row.classList.add("done");
+    if(ticks[k])row.classList.add("out");
     row.onclick=function(){
-      var on=!row.classList.contains("done");
-      row.classList.toggle("done",on);
-      if(on)ticks[k]=true;else delete ticks[k];
+      var excluded=!row.classList.contains("out");
+      row.classList.toggle("out",excluded);
+      if(excluded)ticks[k]=true;else delete ticks[k];
       saveTicks();
     };
   });
