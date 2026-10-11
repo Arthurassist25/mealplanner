@@ -194,7 +194,7 @@ footer{padding:30px 0 20px;color:var(--mut);font-size:12.5px;text-align:center}
 
 <div class="toast" id="toast"></div>
 
-<script src="meals-data.js?v=22"></script>
+<script src="meals-data.js?v=23"></script>
 <script>
 "use strict";
 var LS="mealplanner-v2";
@@ -207,7 +207,7 @@ var CAT_LABEL={"protein":"Protein","vet":"Vegetables","fruit":"Fruit","carbs":"C
 var CAT_ORDER=["protein","vet","fruit","carbs","fats","pantry","drinks","dairy","herbs"];
 var WN=["Week 1","Week 2","Week 3"], DN=["Day 1","Day 2","Day 3","Day 4","Day 5","Day 6","Day 7"],
     SL=["Breakfast","Lunch","Dinner"];
-var PHONE_URL="http://MB13ES.local:8765";
+var PHONE_URL="https://arthurassist25.github.io/mealplanner/";
 
 function P(){return PLANS.filter(function(p){return p.id===state.plan;})[0]||PLANS[0];}
 function key(){var p=P();return p.id+"|"+state.week;}
@@ -391,48 +391,45 @@ function loadTicks(){
   }
 }
 fetch("/state").then(function(r){return r.json();}).then(function(st){window.__remoteState=st;}).catch(function(){});
-function timeBucket(text){
-  var s=String(text||'').toLowerCase();
-  if(/morning|on waking|breakfast/.test(s))return "Morning";
-  if(/midday|mid-day|lunch|after lunch/.test(s))return "Midday";
-  if(/evening|bed|before bed|after dinner/.test(s))return "Evening";
-  return "Flexible timing";
+var TIMING_ORDER=["Morning","Midday","Evening","Flexible timing","Multiple times per day"];
+function itemBucket(name){
+  var timing={
+    "L-glutamine":"Morning", "Thiamine (B1)":"Morning", "Methylated B complex":"Morning",
+    "Quercetin":"Morning", "Candida support (Now brand)":"Midday", "TMG":"Midday", "Allicin (garlic extract)":"Midday", "Berberine":"Midday",
+    "Glycine":"Evening", "Legs up the wall":"Evening", "Mobility + stretching":"Evening", "Posture training":"Evening", "Blackseed oil pulling":"Evening",
+    "Coconut oil pulling":"Morning", "Morning tea ritual":"Morning", "Midday warmth soup or tea":"Midday", "Evening wind-down drink":"Evening",
+    "Magnesium glycinate":"Multiple times per day", "NAC":"Multiple times per day", "Oregano oil":"Multiple times per day", "Betaine HCL":"Multiple times per day",
+    "Brush teeth (miswak)":"Multiple times per day", "Dry brushing":"Multiple times per day", "Movement breaks":"Multiple times per day", "Red light therapy":"Multiple times per day"
+  };return timing[name]||"Flexible timing";
 }
-function routineBucket(item){
-  var s=(item[0]+" "+item[1]+" "+item[2]).toLowerCase();
-  if(/dry brushing/.test(s))return "Morning";
-  if(/coconut oil pulling|morning tea|regular black tea/.test(s))return "Morning";
-  if(/blackseed oil pulling|legs up|castor oil|mobility|stretching|chamomile/.test(s))return /evening|bed/.test(s)?"Evening":"Flexible timing";
-  return "Flexible timing";
-}
-function groupBucket(group){return timeBucket(group);}
 function openSupps(){
-  loadTicks();
-  var D=window.MEAL_DATA, g=(D.suppGroups&&D.suppGroups.length)?D.suppGroups:(P().suppGuide||[]), buckets={"Morning":[],"Midday":[],"Evening":[],"Flexible timing":[]};
-  g.forEach(function(grp){var b=groupBucket(grp.group);buckets[b].push({type:"suppGroup",value:grp});});
-  (D.rituals||[]).forEach(function(r){buckets[timeBucket(r.when)].push({type:"ritual",value:r});});
-  (D.routines||[]).forEach(function(grp){(grp.items||[]).forEach(function(it){buckets[routineBucket(it)].push({type:"routine",value:it});});});
-  var teas=D.teas||[];
-  if(teas.length)buckets.Morning.push({type:"teaOptions",value:teas});
-  var order=["Morning","Midday","Evening","Flexible timing"],html="";
-  order.forEach(function(bucket){
-    var items=buckets[bucket], supp=items.filter(function(x){return x.type==='suppGroup';}), routines=items.filter(function(x){return x.type!=='suppGroup';});
-    if(!items.length)return;
+  loadTicks();var D=window.MEAL_DATA,buckets={};TIMING_ORDER.forEach(function(b){buckets[b]=[];});
+  var seen={};
+  function add(name,dose,when,why,type,phase){
+    if(seen[name])return;seen[name]=true;
+    buckets[itemBucket(name)].push({name:name,dose:dose,when:when,why:why,type:type,phase:phase});
+  }
+  (D.suppGroups||[]).forEach(function(grp){(grp.items||[]).forEach(function(it){
+    var name=it[0],dose=it[1],when=it[2],why=it[3];
+    if(/Magnesium glycinate/.test(name)){name="Magnesium glycinate";dose="Product / clinician guidance";when="Split through the day if appropriate; track total ELEMENTAL magnesium, not compound weight.";why="Do not aim to supersaturate; review dose and kidney health.";}
+    if(/collagen|gelatin/i.test(name)){name="Collagen / gelatin";dose="One daily serving";when="Any time; evening preferred. Use the same serving in the wind-down drink, not an extra dose.";why="Optional protein supplement.";}
+    if(name==='Quercetin')when='Morning; once daily in this schedule. Any extra dose needs separate review.';
+    if(name==='Glutathione nebulisation'){when='Flexible; evening preferred. Only use under prescribing-clinician guidance.';why='Can irritate airways or trigger bronchospasm; not a routine sinus remedy.';}
+    if(/Zeolite|Activated charcoal|Enterosgel/.test(name)){when='Protocol-specific only; check suitability and medication separation with a pharmacist. Not linked to sweating.';why='Can interfere with medicines and nutrients; product name and directions require confirmation.';}
+    add(name,dose,when,why,'supp',grp.kind==='phase');
+  });});
+  (D.rituals||[]).forEach(function(r){add(r.name,'',r.when,(r.text||r.why||'')+(r.note?' '+r.note:''),'rit',false);});
+  (D.routines||[]).forEach(function(grp){(grp.items||[]).forEach(function(it){add(it[0],it[1],it[2],it[3]||'','rout',false);});});
+  if((D.teas||[]).length)add('Tea options','Choose one','Flexible; select a tea for your existing tea ritual, not an additional task.',D.teas.map(function(t){return t.name+' ('+t.when+')';}).join('; '),'rout',false);
+  var html='';TIMING_ORDER.forEach(function(bucket){
     html+='<div class="sgroup">'+bucket+'</div>';
-    html+='<div class="snote">Supplements</div>';
-    if(!supp.length)html+='<p class="snote">None scheduled.</p>';
-    supp.forEach(function(entry){var grp=entry.value,isPhase=grp.kind==='phase';html+='<div class="snote">'+esc(grp.group)+(isPhase?' — protocol phase':'')+'</div>';
-      (grp.items||[]).forEach(function(it){html+='<div class="srow" data-k="supp:'+it[0]+'"><span class="tick"></span><span><b>'+esc(it[0])+'</b> <span class="when">'+esc(it[2])+'</span><br><span class="why">'+esc(it[3])+'</span></span><span class="dose">'+esc(it[1])+'</span></div>';});});
-    html+='<div class="snote">Routines</div>';
-    if(!routines.length)html+='<p class="snote">None scheduled.</p>';
-    routines.forEach(function(entry){if(entry.type==='teaOptions'){html+='<div class="srow" data-k="tea-options"><span class="tick"></span><span><b>Tea options</b> <span class="when">Morning or evening</span><br><span class="why">'+esc(entry.value.map(function(t){return t.name;}).join(', '))+'</span></span></div>';return;}var x=entry.value,k=entry.type==='ritual'?'rit:'+x.name:'rout:'+x[0],name=entry.type==='ritual'?x.name:x[0],when=entry.type==='ritual'?x.when:x[1],why=entry.type==='ritual'?(x.text||x.why||'')+((x.note?' '+x.note:'')):x[2];html+='<div class="srow" data-k="'+esc(k)+'"><span class="tick"></span><span><b>'+esc(name)+'</b> <span class="when">'+esc(when)+'</span><br><span class="why">'+esc(why)+'</span></span></div>';});
+    buckets[bucket].forEach(function(x){
+      html+='<div class="srow" data-k="'+esc(x.type+':'+x.name)+'"><span class="tick"></span><span><b>'+esc(x.name)+'</b>'+(x.phase?' <span class="badge phase">Protocol-specific</span>':'')+' <span class="when">'+esc(x.when)+'</span><br><span class="why">'+esc(x.why)+'</span></span><span class="dose">'+esc(x.dose)+'</span></div>';
+    });
   });
-  if(P().suppsNote) html+='<p class="snote">'+esc(P().suppsNote)+'</p>';
-  q("#shList").innerHTML=html;
-  wireTicks();
-  q("#shTitle").textContent="Routines & Supplements";
-  q("#shSub").textContent="Tap an item to exclude or include it. Exclusions persist until you toggle them again. Protocol-phase labels show when an item is intended to be used.";
-  q("#ov").classList.add("open");
+  html+='<p class="snote">Timing organises your preferences; it is not medical approval of supplement doses or treatments. Flexible and repeated items appear only once. Follow product limits and clinician advice.</p>';
+  q('#shList').innerHTML=html;wireTicks();q('#shTitle').textContent='Routines & Supplements';
+  q('#shSub').textContent='One entry per item. Morning / midday / evening contain once-daily items only. Tap to include or exclude; exclusions persist.';q('#ov').classList.add('open');
 }
 q("#suppRoutBtn").onclick=openSupps;
 
